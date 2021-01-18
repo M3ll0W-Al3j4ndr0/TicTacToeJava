@@ -6,7 +6,8 @@ public class Engine implements Subject{
 	private boolean xTurn,
 			aWinner;
 	private BoxState winnerPlayer;
-	private int numOfTurns;
+	private int numOfTurns,
+			lastPosition;
 	private ArrayList<Observer> observers;
 
 	public Engine(){
@@ -15,6 +16,7 @@ public class Engine implements Subject{
 		xTurn = true;
 		aWinner = false;
 		numOfTurns = 0;
+		lastPosition = 0;
 
 		for(int i = 0; i < 9; i++){
 			board[i] = BoxState.NEUTRAL;
@@ -58,8 +60,15 @@ public class Engine implements Subject{
 	public void markPosition(int position){
 		board[position] = xTurn? BoxState.XPLAYER
 					: BoxState.OPLAYER;
+		lastPosition = position;
+		notifyObservers();
+		checkForWinner();
 
 		xTurn = !xTurn;
+	}
+
+	public int getUpdatedPosition(){
+		return lastPosition;
 	}
 
 	//In development..

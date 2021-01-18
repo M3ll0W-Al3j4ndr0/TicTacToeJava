@@ -7,22 +7,29 @@ public class View implements Observer{
 	private GridLayout layout;
 	private JPanel boardPanel,
 			overAllPanel,
-			menuPanel;
+			menuPanel,
+			innerMenuPanel,
+			innerButtonPanel,
+			innerLabelPanel;
 	private JButton[] buttons;
 	private JButton vsCpuButton,
 			twoPlayerButton,
-			exitButton;
+			exitButton,
+			retryButton,
+			exitButton2;
 	private ButtonListener buttonListener;
 	private JMenuBar menuBar;
 	private ImageIcon xImage,
 		oImage;
 	private boolean xTurn = true;
 	private Controller controller;
-	private JLabel menuLabel;
+	private JLabel menuLabel,
+			testLabel;
 	private GridBagConstraints labelConstraints,
 					vsCpuButtonConstraints,
 					exitButtonConstraints,
 					twoPlayerButtonConstraints;
+	private JLayeredPane layeredPanel;
 	private Engine model;
 	private final String MENU = "Menu panel",
 				TWOPLAYER = "Two player panel";
@@ -34,19 +41,68 @@ public class View implements Observer{
 
 		overAllPanel = new JPanel();
 		overAllPanel.setLayout(new CardLayout());
+
+		layeredPanel = new JLayeredPane();
+		testLabel = new JLabel("Congratulations!!");
+		innerMenuPanel = new JPanel();
+
+		innerMenuPanel.setOpaque(true);
+		innerMenuPanel.setBounds(100, 200, 300, 100);
+		innerMenuPanel.setLayout(new BorderLayout());
+		
+		//testLabel.setBackground(Color.BLUE);
+		testLabel.setOpaque(true);
+		//testLabel.setBounds(100, 200, 300, 100);
+		//testLabel.setBounds(0, 0, 500, 500);
+		testLabel.setFont(new Font("Calibri", Font.PLAIN, 20));
+
+		innerLabelPanel = new JPanel();
+		innerLabelPanel.add(testLabel);
+
+		innerMenuPanel.add(innerLabelPanel);
+
+
+		innerButtonPanel = new JPanel();
+		retryButton = new JButton("Retry");
+		exitButton2 = new JButton("Exit");
+		exitButton2.addActionListener(new ExitButtonListener());
+
+		innerButtonPanel.add(retryButton);
+		innerButtonPanel.add(exitButton2);
+		
+		innerMenuPanel.add(innerButtonPanel, BorderLayout.SOUTH);
+
+		layeredPanel.add(boardPanel, Integer.valueOf(1));
+		layeredPanel.add(innerMenuPanel, Integer.valueOf(0));
 		
 		overAllPanel.add(menuPanel, MENU);
-		overAllPanel.add(boardPanel, TWOPLAYER);
+		//overAllPanel.add(boardPanel, TWOPLAYER);
+		overAllPanel.add(layeredPanel, TWOPLAYER);
 
 		//frame.add(boardPanel);
 		//frame.add(menuPanel);
 		frame.add(overAllPanel);
+		frame.setResizable(false);
 		frame.setVisible(true);
 	}
 
+	public void showEndingMenu(){
+		layeredPanel.setLayer(innerMenuPanel, Integer.valueOf(2));		
+		for(JButton button: buttons){
+			button.setEnabled(false);
+		}
+	}
+
+
 	public void update(){
-		CardLayout cli = (CardLayout)(overAllPanel.getLayout());	
-		cli.show(overAllPanel, MENU);
+		//CardLayout cli = (CardLayout)(overAllPanel.getLayout());	
+		//cli.show(overAllPanel, MENU);
+
+		int position = model.getUpdatedPosition();
+		buttons[position].setText("");
+		buttons[position].setIcon(model.isXTurn()? xImage: oImage);
+		buttons[position].setDisabledIcon(model.isXTurn()? xImage: oImage);
+		buttons[position].removeActionListener(buttonListener);
 	}
 
 	public void setModel(Engine model){
@@ -104,15 +160,17 @@ public class View implements Observer{
 		boardPanel = new JPanel();
 		menuBar = new JMenuBar();
 		//System.setProperty("apple.laf.useScreenMenuBar", "true");
-		xImage = getImage("x.png");
-		oImage = getImage("o.png");
+		//xImage = getImage("x.png");
+		xImage = getImage("src/Resources/x.png");
+		//oImage = getImage("o.png");
+		oImage = getImage("src/Resources/o.png");
 
 		JMenu help = new JMenu("Help");
 		menuBar.add(help);
 
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		frame.setSize(500, 500);
+		frame.setSize(500, 550);
 		frame.setJMenuBar(menuBar);
 
 		buttons = new JButton[9];
@@ -126,6 +184,7 @@ public class View implements Observer{
 		}
 
 		boardPanel.setBackground(Color.BLACK);
+		boardPanel.setBounds(0, 0, 500, 500);
 
 	}
 
@@ -152,12 +211,14 @@ public class View implements Observer{
 				}
 			}
 
+			/*
 			button.setIcon(xTurn? xImage: oImage);
 
 			xTurn = !xTurn;
 
 			button.setText("");
 			button.removeActionListener(buttonListener);
+			*/
 		}
 	}
 

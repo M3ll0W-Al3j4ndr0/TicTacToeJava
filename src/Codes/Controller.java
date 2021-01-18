@@ -12,11 +12,12 @@ public class Controller{
 
 	public void playerEnteredPosition(int position){
 		model.markPosition(position);
-		model.checkForWinner();
+		//model.checkForWinner();
 
 		if(model.haveAWinner()){
 			//System.exit(0);
-			model.notifyObservers();
+			//model.notifyObservers();
+			viewer.showEndingMenu();
 		}
 	}
 }
