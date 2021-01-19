@@ -4,7 +4,6 @@ import java.awt.event.*;
 
 public class View implements Observer{
 	private JFrame frame;
-	private GridLayout layout;
 	private JPanel boardPanel,
 			overAllPanel,
 			menuPanel,
@@ -21,10 +20,9 @@ public class View implements Observer{
 	private JMenuBar menuBar;
 	private ImageIcon xImage,
 		oImage;
-	private boolean xTurn = true;
 	private Controller controller;
 	private JLabel menuLabel,
-			testLabel;
+			resultLabel;
 	private GridBagConstraints labelConstraints,
 					vsCpuButtonConstraints,
 					exitButtonConstraints,
@@ -35,74 +33,23 @@ public class View implements Observer{
 				TWOPLAYER = "Two player panel";
 
 	public View(){
-		frame = new JFrame("Tic Tac Toe");
-		setUpBoard();
-		setUpMenu();
+		xImage = getImage("src/Resources/x.png");
+		oImage = getImage("src/Resources/o.png");
 
-		overAllPanel = new JPanel();
-		overAllPanel.setLayout(new CardLayout());
-
-		layeredPanel = new JLayeredPane();
-		testLabel = new JLabel("Congratulations!!");
-		innerMenuPanel = new JPanel();
-
-		innerMenuPanel.setOpaque(true);
-		innerMenuPanel.setBounds(100, 200, 300, 100);
-		innerMenuPanel.setLayout(new BorderLayout());
-		
-		//testLabel.setBackground(Color.BLUE);
-		testLabel.setOpaque(true);
-		//testLabel.setBounds(100, 200, 300, 100);
-		//testLabel.setBounds(0, 0, 500, 500);
-		testLabel.setFont(new Font("Calibri", Font.PLAIN, 20));
-
-		innerLabelPanel = new JPanel();
-		innerLabelPanel.add(testLabel);
-
-		innerMenuPanel.add(innerLabelPanel);
-
-
-		innerButtonPanel = new JPanel();
-		retryButton = new JButton("Retry");
-		exitButton2 = new JButton("Exit");
-		exitButton2.addActionListener(new ExitButtonListener());
-
-		innerButtonPanel.add(retryButton);
-		innerButtonPanel.add(exitButton2);
-		
-		innerMenuPanel.add(innerButtonPanel, BorderLayout.SOUTH);
-
-		layeredPanel.add(boardPanel, Integer.valueOf(1));
-		layeredPanel.add(innerMenuPanel, Integer.valueOf(0));
-		
-		overAllPanel.add(menuPanel, MENU);
-		//overAllPanel.add(boardPanel, TWOPLAYER);
-		overAllPanel.add(layeredPanel, TWOPLAYER);
-
-		//frame.add(boardPanel);
-		//frame.add(menuPanel);
-		frame.add(overAllPanel);
-		frame.setResizable(false);
+		frame = setUpFrame();
 		frame.setVisible(true);
 	}
 
-	public void showEndingMenu(){
-		layeredPanel.setLayer(innerMenuPanel, Integer.valueOf(2));		
-		for(JButton button: buttons){
-			button.setEnabled(false);
-		}
+	// in development.. currently testing.. looks like it's working.. 
+	public void reset(){
+		layeredPanel.setLayer(innerMenuPanel, Integer.valueOf(0));
+		boardPanel.removeAll();
+		boardPanel = addBoardPanelComponents(boardPanel);
+		boardPanel.validate();
 	}
 
-
-	public void update(){
-		//CardLayout cli = (CardLayout)(overAllPanel.getLayout());	
-		//cli.show(overAllPanel, MENU);
-
-		int position = model.getUpdatedPosition();
-		buttons[position].setText("");
-		buttons[position].setIcon(model.isXTurn()? xImage: oImage);
-		buttons[position].setDisabledIcon(model.isXTurn()? xImage: oImage);
-		buttons[position].removeActionListener(buttonListener);
+	public void setController(Controller controller){
+		this.controller = controller;
 	}
 
 	public void setModel(Engine model){
@@ -110,86 +57,51 @@ public class View implements Observer{
 		((Subject)model).registerObserver(this);
 	}
 
-	private void setUpMenu(){
-		menuPanel = new JPanel();
-		menuPanel.setLayout(new GridBagLayout());
-
-		menuLabel = new JLabel("Select Mode:");
-		menuLabel.setFont(new Font("Calibri", Font.PLAIN, 40));
-
-		labelConstraints = new GridBagConstraints();
-		labelConstraints.gridx = 0;
-		labelConstraints.gridy = 0;
-		labelConstraints.gridwidth = 3;
-		labelConstraints.insets = new Insets(0, 0, 100, 0);
-
-		menuPanel.add(menuLabel, labelConstraints);
-
-		vsCpuButton = new JButton("vs CPU");
-		vsCpuButtonConstraints = new GridBagConstraints();
-		
-		vsCpuButtonConstraints.gridx = 0;
-		vsCpuButtonConstraints.gridy = 1;
-		
-		menuPanel.add(vsCpuButton, vsCpuButtonConstraints);
-
-		exitButton = new JButton("Exit");
-		exitButton.addActionListener(new ExitButtonListener());
-		exitButtonConstraints = new GridBagConstraints();
-
-		exitButtonConstraints.gridx = 1;
-		exitButtonConstraints.gridy = 2;
-	
-		menuPanel.add(exitButton, exitButtonConstraints);
-
-
-		twoPlayerButton = new JButton("2 Players");
-		twoPlayerButton.addActionListener(new TwoPlayerButtonListener());
-		twoPlayerButtonConstraints = new GridBagConstraints();
-
-		twoPlayerButtonConstraints.gridx = 2;
-		twoPlayerButtonConstraints.gridy = 1;
-
-		menuPanel.add(twoPlayerButton, twoPlayerButtonConstraints);
-
-		//menuPanel.setBackground(Color.ORANGE);
+	public void update(){
+		int position = model.getUpdatedPosition();
+		buttons[position].setText("");
+		buttons[position].setIcon(model.isXTurn()? xImage: oImage);
+		buttons[position].setDisabledIcon(model.isXTurn()? xImage: oImage);
+		buttons[position].removeActionListener(buttonListener);
 	}
 
-	private void setUpBoard(){
-		layout = new GridLayout(3, 3);
-		boardPanel = new JPanel();
-		menuBar = new JMenuBar();
-		//System.setProperty("apple.laf.useScreenMenuBar", "true");
-		//xImage = getImage("x.png");
-		xImage = getImage("src/Resources/x.png");
-		//oImage = getImage("o.png");
-		oImage = getImage("src/Resources/o.png");
+	public void showEndingMenu(){
+		String message = model.haveAWinner()? 
+					model.xPlayerWon()? "O you suck!"
+							: "Nice one O!"
+					: "It's a Tie!!";
+		resultLabel.setText(message);
+		layeredPanel.setLayer(innerMenuPanel, Integer.valueOf(2));	
 
-		JMenu help = new JMenu("Help");
-		menuBar.add(help);
-
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-		frame.setSize(500, 550);
-		frame.setJMenuBar(menuBar);
-
-		buttons = new JButton[9];
-		buttonListener = new ButtonListener();
-		boardPanel.setLayout(layout);
-
-		for(int i = 0; i < 9; i++){
-			buttons[i] = new JButton("Click here!!");
-			buttons[i].addActionListener(buttonListener);
-			boardPanel.add(buttons[i]);
+		for(JButton button: buttons){
+			button.setEnabled(false);
 		}
-
-		boardPanel.setBackground(Color.BLACK);
-		boardPanel.setBounds(0, 0, 500, 500);
-
 	}
 
-	public void setController(Controller controller){
-		this.controller = controller;
+	private JFrame setUpFrame(){
+		frame = setUpFrameDetails();
+		frame = addFrameComponents(frame);
+
+		return frame;
+	}
+
+	private JFrame setUpFrameDetails(){
+		frame = new JFrame("Tic Tac Toe");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setResizable(false);
+		frame.setSize(500, 550);
+
+		return frame;
+	}
+
+	private JFrame addFrameComponents(JFrame frame){
+		menuBar = setUpMenuBar();
+		overAllPanel = setUpOverAllPanel();
+
+		frame.setJMenuBar(menuBar);
+		frame.add(overAllPanel);
+
+		return frame;
 	}
 
 	private ImageIcon getImage(String file){
@@ -197,6 +109,280 @@ public class View implements Observer{
 		Image temp2 = temp.getImage();
 		Image temp3 = temp2.getScaledInstance(80, 80, Image.SCALE_SMOOTH);
 		return new ImageIcon(temp3);
+	}
+
+	private JMenuBar setUpMenuBar(){
+		menuBar = new JMenuBar();
+		menuBar = addUpMenuBarComponents(menuBar);
+
+		return menuBar;
+	}
+
+	private JMenuBar addUpMenuBarComponents(JMenuBar menuBar){
+		JMenu help = new JMenu("Help");
+		menuBar.add(help);
+
+		return menuBar;
+	}
+
+	private JPanel setUpOverAllPanel(){
+		overAllPanel = setUpOverAllPanelDetails();
+		
+		overAllPanel = addOverAllPanelComponents(overAllPanel);
+
+		return overAllPanel;
+	}
+
+	private JPanel setUpOverAllPanelDetails(){
+		overAllPanel = new JPanel();
+		overAllPanel.setLayout(new CardLayout());
+
+		return overAllPanel;
+	}
+
+	private JPanel addOverAllPanelComponents(JPanel overAllPanel){
+		menuPanel = setUpMenuPanel();
+		layeredPanel = setUpLayeredPanel();
+	
+		overAllPanel.add(menuPanel, MENU);
+		overAllPanel.add(layeredPanel, TWOPLAYER);
+
+		return overAllPanel;
+	}
+
+	private JPanel setUpMenuPanel(){
+		menuPanel = setUpMenuPanelDetails();
+
+		menuPanel = addMenuPanelComponents(menuPanel);
+
+		return menuPanel;
+	}
+
+	private JPanel setUpMenuPanelDetails(){
+		menuPanel = new JPanel();
+		menuPanel.setLayout(new GridBagLayout());
+
+		return menuPanel;
+	}
+
+	private JPanel addMenuPanelComponents(JPanel menuPanel){
+		menuLabel = setUpMenuLabel();
+		labelConstraints = setUpLabelConstraints();
+
+		vsCpuButton = new JButton("vs CPU");
+		vsCpuButtonConstraints = setUpVsCpuConstraints();
+
+		exitButton = setUpExitButton();
+		exitButtonConstraints = setUpExitButtonConstraints();
+	
+		twoPlayerButton = setUpTwoPlayerButton();
+		twoPlayerButtonConstraints = setUpTwoPlayerButtonConstraints();
+
+		menuPanel.add(menuLabel, labelConstraints);
+		menuPanel.add(vsCpuButton, vsCpuButtonConstraints);
+		menuPanel.add(exitButton, exitButtonConstraints);
+		menuPanel.add(twoPlayerButton, twoPlayerButtonConstraints);
+
+		return menuPanel;
+	}
+
+	private JLabel setUpMenuLabel(){
+		menuLabel = new JLabel("Select Mode:");
+		menuLabel.setFont(new Font("Calibri", Font.PLAIN, 40));
+
+		return menuLabel;
+	}
+
+	private GridBagConstraints setUpLabelConstraints(){
+		labelConstraints = new GridBagConstraints();
+		labelConstraints.gridx = 0;
+		labelConstraints.gridy = 0;
+		labelConstraints.gridwidth = 3;
+		labelConstraints.insets = new Insets(0, 0, 100, 0);
+
+		return labelConstraints;
+	}
+
+	private GridBagConstraints setUpVsCpuConstraints(){
+		vsCpuButtonConstraints = new GridBagConstraints();
+		vsCpuButtonConstraints.gridx = 0;
+		vsCpuButtonConstraints.gridy = 1;
+
+		return vsCpuButtonConstraints;
+	}
+
+	private JButton setUpExitButton(){
+		exitButton = new JButton("Exit");
+		exitButton.addActionListener(new ExitButtonListener());
+
+		return exitButton;
+	}
+
+	private GridBagConstraints setUpExitButtonConstraints(){
+		exitButtonConstraints = new GridBagConstraints();
+		exitButtonConstraints.gridx = 1;
+		exitButtonConstraints.gridy = 2;
+
+		return exitButtonConstraints;
+	}
+
+	private JButton setUpTwoPlayerButton(){
+		twoPlayerButton = new JButton("2 Players");
+		twoPlayerButton.addActionListener(new TwoPlayerButtonListener());
+
+		return twoPlayerButton;
+	}
+
+	private GridBagConstraints setUpTwoPlayerButtonConstraints(){
+		twoPlayerButtonConstraints = new GridBagConstraints();
+		twoPlayerButtonConstraints.gridx = 2;
+		twoPlayerButtonConstraints.gridy = 1;
+
+		return twoPlayerButtonConstraints;
+	}
+
+	private JLayeredPane setUpLayeredPanel(){
+		layeredPanel = new JLayeredPane();
+
+		layeredPanel = addLayeredPanelComponents(layeredPanel);
+
+		return layeredPanel;
+	}
+
+	private JLayeredPane addLayeredPanelComponents(JLayeredPane layeredPanel){
+		boardPanel = setUpBoardPanel();
+		innerMenuPanel = setUpInnerMenuPanel();
+	
+		layeredPanel.add(boardPanel, Integer.valueOf(1));
+		layeredPanel.add(innerMenuPanel, Integer.valueOf(0));
+
+		return layeredPanel;
+	}
+
+	private JPanel setUpBoardPanel(){
+		boardPanel = setUpBoardPanelDetails();
+
+		boardPanel = addBoardPanelComponents(boardPanel);
+
+		return boardPanel;
+	}
+
+	private JPanel setUpBoardPanelDetails(){
+		boardPanel = new JPanel();
+		boardPanel.setLayout(new GridLayout(3, 3));
+		boardPanel.setBackground(Color.BLACK);
+		boardPanel.setBounds(0, 0, 500, 500);
+
+		return boardPanel;
+	}
+
+	private JPanel addBoardPanelComponents(JPanel boardPanel){
+		buttons = setUpButtons();
+
+		boardPanel = addButtonsToBoardPanel(boardPanel, buttons);
+
+		return boardPanel;
+	}
+
+	private JButton[] setUpButtons(){
+		buttons = new JButton[9];
+		buttonListener = new ButtonListener();
+
+		for(int i = 0; i < 9; i++){
+			buttons[i] = setUpButton(buttonListener);
+		}
+
+		return buttons;
+	}
+
+	private JButton setUpButton(ButtonListener buttonListener){
+		JButton button = new JButton("Click here!!");
+		button.addActionListener(buttonListener);
+
+		return button;
+	}
+
+	private JPanel addButtonsToBoardPanel(JPanel boardPanel, JButton[] buttons){
+		for(JButton button: buttons){
+			boardPanel.add(button);
+		}
+		
+		return boardPanel;
+	}
+
+	private JPanel setUpInnerMenuPanel(){
+		innerMenuPanel = setUpInnerMenuPanelDetails();
+		innerMenuPanel = addInnerMenuPanelComponents(innerMenuPanel);
+		
+		return innerMenuPanel;
+	}
+
+	private JPanel setUpInnerMenuPanelDetails(){
+		innerMenuPanel = new JPanel();
+		innerMenuPanel.setOpaque(true);
+		innerMenuPanel.setBounds(100, 200, 300, 100);
+		innerMenuPanel.setLayout(new BorderLayout());
+
+		return innerMenuPanel;
+	}
+
+	private JPanel addInnerMenuPanelComponents(JPanel innerMenuPanel){
+		innerLabelPanel = setUpInnerLabelPanel();
+		innerButtonPanel = setUpInnerButtonPanel();
+
+		innerMenuPanel.add(innerLabelPanel);
+		innerMenuPanel.add(innerButtonPanel, BorderLayout.SOUTH);
+
+		return innerMenuPanel;
+	}
+
+	private JPanel setUpInnerLabelPanel(){
+		innerLabelPanel = new JPanel();
+
+		resultLabel = setUpResultLabel();
+
+		innerLabelPanel.add(resultLabel);
+
+		return innerLabelPanel;
+	}
+	
+	private JLabel setUpResultLabel(){
+		resultLabel = new JLabel("Congratulations!!");
+		resultLabel.setOpaque(true);
+		resultLabel.setFont(new Font("Calibri", Font.PLAIN, 20));
+
+		return resultLabel;
+	}
+
+	private JPanel setUpInnerButtonPanel(){
+		innerButtonPanel = new JPanel();
+
+		innerButtonPanel = addInnerButtonPanelComponents(innerButtonPanel);
+
+		return innerButtonPanel;
+	}
+
+	private JPanel addInnerButtonPanelComponents(JPanel innerButtonPanel){
+		retryButton = setUpRetryButton();
+		exitButton2 = setUpExitButton2();
+
+		innerButtonPanel.add(retryButton);
+		innerButtonPanel.add(exitButton2);
+
+		return innerButtonPanel;
+	}
+
+	private JButton setUpRetryButton(){
+		retryButton = new JButton("Retry");
+		retryButton.addActionListener(new RetryButtonListener());
+		return retryButton;
+	}
+
+	private JButton setUpExitButton2(){
+		exitButton2 = new JButton("Exit");
+		exitButton2.addActionListener(new ExitButtonListener());
+
+		return exitButton2;
 	}
 
 	private class ButtonListener implements ActionListener{
@@ -210,15 +396,6 @@ public class View implements Observer{
 					break;
 				}
 			}
-
-			/*
-			button.setIcon(xTurn? xImage: oImage);
-
-			xTurn = !xTurn;
-
-			button.setText("");
-			button.removeActionListener(buttonListener);
-			*/
 		}
 	}
 
@@ -232,6 +409,12 @@ public class View implements Observer{
 		public void actionPerformed(ActionEvent e){
 			CardLayout cl = (CardLayout)(overAllPanel.getLayout());
 			cl.show(overAllPanel, TWOPLAYER);
+		}
+	}
+		
+	private class RetryButtonListener implements ActionListener{
+		public void actionPerformed(ActionEvent e){
+			controller.reset();	
 		}
 	}
 }

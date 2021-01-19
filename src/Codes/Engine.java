@@ -12,6 +12,14 @@ public class Engine implements Subject{
 
 	public Engine(){
 		observers = new ArrayList<Observer>();
+		initialize();
+	}
+
+	public void reset(){
+		initialize();
+	}
+
+	private void initialize(){
 		board = new BoxState[9];
 		xTurn = true;
 		aWinner = false;
@@ -21,6 +29,7 @@ public class Engine implements Subject{
 		for(int i = 0; i < 9; i++){
 			board[i] = BoxState.NEUTRAL;
 		}
+
 	}
 
 	public void registerObserver(Observer observer){
@@ -63,6 +72,10 @@ public class Engine implements Subject{
 		lastPosition = position;
 		notifyObservers();
 		checkForWinner();
+
+		if(xTurn){
+			numOfTurns++;
+		}
 
 		xTurn = !xTurn;
 	}
