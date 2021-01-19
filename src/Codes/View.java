@@ -30,7 +30,7 @@ public class View implements Observer{
 	private JLayeredPane layeredPanel;
 	private Engine model;
 	private final String MENU = "Menu panel",
-				TWOPLAYER = "Two player panel";
+				BOARD = "Board panel";
 
 	public View(){
 		xImage = getImage("src/Resources/x.png");
@@ -40,7 +40,6 @@ public class View implements Observer{
 		frame.setVisible(true);
 	}
 
-	// in development.. currently testing.. looks like it's working.. 
 	public void reset(){
 		layeredPanel.setLayer(innerMenuPanel, Integer.valueOf(0));
 		boardPanel.removeAll();
@@ -108,6 +107,7 @@ public class View implements Observer{
 		ImageIcon temp = new ImageIcon(file);
 		Image temp2 = temp.getImage();
 		Image temp3 = temp2.getScaledInstance(80, 80, Image.SCALE_SMOOTH);
+
 		return new ImageIcon(temp3);
 	}
 
@@ -145,7 +145,7 @@ public class View implements Observer{
 		layeredPanel = setUpLayeredPanel();
 	
 		overAllPanel.add(menuPanel, MENU);
-		overAllPanel.add(layeredPanel, TWOPLAYER);
+		overAllPanel.add(layeredPanel, BOARD);
 
 		return overAllPanel;
 	}
@@ -170,6 +170,7 @@ public class View implements Observer{
 		labelConstraints = setUpLabelConstraints();
 
 		vsCpuButton = new JButton("vs CPU");
+		vsCpuButton.addActionListener(new VsCpuButtonListener());
 		vsCpuButtonConstraints = setUpVsCpuConstraints();
 
 		exitButton = setUpExitButton();
@@ -391,7 +392,6 @@ public class View implements Observer{
 
 			for(int i = 0; i < 9; i++){
 				if(button == buttons[i]){
-					System.out.println("Button: " + i);
 					controller.playerEnteredPosition(i);
 					break;
 				}
@@ -407,14 +407,23 @@ public class View implements Observer{
 
 	private class TwoPlayerButtonListener implements ActionListener{
 		public void actionPerformed(ActionEvent e){
+			controller.cpuMode(false);	
 			CardLayout cl = (CardLayout)(overAllPanel.getLayout());
-			cl.show(overAllPanel, TWOPLAYER);
+			cl.show(overAllPanel, BOARD);
 		}
 	}
 		
 	private class RetryButtonListener implements ActionListener{
 		public void actionPerformed(ActionEvent e){
 			controller.reset();	
+		}
+	}
+
+	private class VsCpuButtonListener implements ActionListener{
+		public void actionPerformed(ActionEvent e){
+			controller.cpuMode(true);	
+			CardLayout cl = (CardLayout)(overAllPanel.getLayout());
+			cl.show(overAllPanel, BOARD);
 		}
 	}
 }

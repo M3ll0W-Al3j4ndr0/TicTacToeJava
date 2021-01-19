@@ -10,6 +10,11 @@ public class Controller{
 		viewer.setModel(model);
 	}
 
+	public void reset(){
+		model.reset();
+		viewer.reset();
+	}
+
 	public void playerEnteredPosition(int position){
 		model.markPosition(position);
 
@@ -18,8 +23,7 @@ public class Controller{
 		}
 	}
 
-	public void reset(){
-		model.reset();
-		viewer.reset();
+	public void cpuMode(boolean enable){
+		model.setCPUMode(enable);
 	}
 }

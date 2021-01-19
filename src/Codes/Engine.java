@@ -1,35 +1,31 @@
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Engine implements Subject{
 	private enum BoxState{ NEUTRAL, XPLAYER, OPLAYER}
 	private BoxState[] board;
 	private boolean xTurn,
-			aWinner;
+			aWinner,
+			cpuMode;
 	private BoxState winnerPlayer;
 	private int numOfTurns,
 			lastPosition;
 	private ArrayList<Observer> observers;
+	private Random randomGenerator;
 
 	public Engine(){
 		observers = new ArrayList<Observer>();
+		randomGenerator = new Random();
+		cpuMode = false;
 		initialize();
+	}
+
+	public void setCPUMode(boolean cpuMode){
+		this.cpuMode = cpuMode;
 	}
 
 	public void reset(){
 		initialize();
-	}
-
-	private void initialize(){
-		board = new BoxState[9];
-		xTurn = true;
-		aWinner = false;
-		numOfTurns = 0;
-		lastPosition = 0;
-
-		for(int i = 0; i < 9; i++){
-			board[i] = BoxState.NEUTRAL;
-		}
-
 	}
 
 	public void registerObserver(Observer observer){
@@ -78,23 +74,55 @@ public class Engine implements Subject{
 		}
 
 		xTurn = !xTurn;
+
+		if(!xTurn && cpuMode && numOfTurns < 5){
+			doCPUTurn();	
+		}
+	}
+
+	public void doCPUTurn(){
+		ArrayList<Integer> emptyPositions = getEmptyPositions(board);
+		int size = emptyPositions.size();
+
+		int randomPosition = randomGenerator.nextInt(size);
+
+		markPosition(emptyPositions.get(randomPosition));
+	}
+
+	public ArrayList<Integer> getEmptyPositions(BoxState[] board){
+		ArrayList<Integer> emptyPositions = new ArrayList<Integer>();
+
+		for(int i = 0; i < 9; i++){
+			if(board[i] == BoxState.NEUTRAL){
+				emptyPositions.add(i);
+			}
+		}	
+
+		return emptyPositions;
 	}
 
 	public int getUpdatedPosition(){
 		return lastPosition;
 	}
 
-	//In development..
 	public void checkForWinner(){
-		checkRows();
-		checkColumns();
-		checkDiagonals();
-		if(aWinner){
-			System.out.println("A winner is announced");
-		}
+		aWinner = checkRows() || checkColumns() || checkDiagonals();
 	}
 
-	private void checkRows(){
+	private void initialize(){
+		board = new BoxState[9];
+		xTurn = true;
+		aWinner = false;
+		numOfTurns = 0;
+		lastPosition = 0;
+
+		for(int i = 0; i < 9; i++){
+			board[i] = BoxState.NEUTRAL;
+		}
+
+	}
+
+	private boolean checkRows(){
 		for(int i = 0; i < 9; i += 3){
 			if(board[i] == BoxState.NEUTRAL){
 				continue;
@@ -106,13 +134,14 @@ public class Engine implements Subject{
 				continue;
 			}
 
-			aWinner = true;
 			winnerPlayer = board[i];
-			break;
+			return true;
 		}
+		
+		return false;
 	}
 
-	private void checkColumns(){
+	private boolean checkColumns(){
 		for(int i = 0; i < 3; i++){
 			if(board[i] == BoxState.NEUTRAL){
 				continue;
@@ -124,26 +153,21 @@ public class Engine implements Subject{
 				continue;
 			}
 
-			aWinner = true;
 			winnerPlayer = board[i];
-			break;
+			return true;
 		}
+
+		return false;
 	}
 
-	private void checkDiagonals(){
+	private boolean checkDiagonals(){
 		if(board[4] != BoxState.NEUTRAL){
 			if(((board[0] == board[8]) && (board[0] == board[4]))
 			|| ((board[2] == board[6]) && (board[2] == board[4]))){
-				aWinner = true;
 				winnerPlayer = board[4];
+				return true;
 			}
 		}
-	}
-
-	//Test method
-	public void printBoard(){
-		for(BoxState state: board){
-			System.out.println(state);
-		}
+		return false;
 	}
 }
