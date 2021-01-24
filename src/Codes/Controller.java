@@ -1,3 +1,5 @@
+//package hisasaga.alejandro;
+
 public class Controller{
 	private View viewer;
 	private Engine model;
@@ -25,5 +27,10 @@ public class Controller{
 
 	public void cpuMode(boolean enable){
 		model.setCPUMode(enable);
+	}
+
+	public void toMenu(){
+		viewer.showMainMenu();
+		model.reset();
 	}
 }

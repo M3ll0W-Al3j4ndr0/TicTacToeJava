@@ -1,3 +1,6 @@
+//package hisasaga.alejandro;
+
+import java.net.URL;
 import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
@@ -15,11 +18,18 @@ public class View implements Observer{
 			twoPlayerButton,
 			exitButton,
 			retryButton,
-			exitButton2;
+			exitButton2,
+			toMenuButton;
 	private ButtonListener buttonListener;
 	private JMenuBar menuBar;
+	private JMenu help;
+	private JMenuItem instructions,
+			moreHelp;
 	private ImageIcon xImage,
-		oImage;
+		oImage,
+		faceImage,
+		lifeLineImage,
+		appIcon;
 	private Controller controller;
 	private JLabel menuLabel,
 			resultLabel;
@@ -33,11 +43,24 @@ public class View implements Observer{
 				BOARD = "Board panel";
 
 	public View(){
-		xImage = getImage("src/Resources/x.png");
-		oImage = getImage("src/Resources/o.png");
+		String filePath = "Resources/";
+		xImage = getImage(filePath + "x.png");
+		oImage = getImage(filePath + "o.png");
+		faceImage = getImage(filePath + "face.jpg");
+		lifeLineImage = getImage(filePath + "lifeLine.png");
+		appIcon = getImage(filePath + "appIcon.png");
+
 
 		frame = setUpFrame();
+		frame.setIconImage(appIcon.getImage());
 		frame.setVisible(true);
+	}
+
+	public void showMainMenu(){
+		CardLayout cli = (CardLayout)overAllPanel.getLayout();
+
+		cli.show(overAllPanel, MENU);
+		reset();
 	}
 
 	public void reset(){
@@ -66,8 +89,8 @@ public class View implements Observer{
 
 	public void showEndingMenu(){
 		String message = model.haveAWinner()? 
-					model.xPlayerWon()? "O you suck!"
-							: "Nice one O!"
+					model.xPlayerWon()? "X player wins!"
+							: "O player wins!"
 					: "It's a Tie!!";
 		resultLabel.setText(message);
 		layeredPanel.setLayer(innerMenuPanel, Integer.valueOf(2));	
@@ -104,7 +127,9 @@ public class View implements Observer{
 	}
 
 	private ImageIcon getImage(String file){
-		ImageIcon temp = new ImageIcon(file);
+		URL url = getClass().getResource(file);
+		ImageIcon temp = new ImageIcon(url);
+		//ImageIcon temp = new ImageIcon(file);
 		Image temp2 = temp.getImage();
 		Image temp3 = temp2.getScaledInstance(80, 80, Image.SCALE_SMOOTH);
 
@@ -119,10 +144,41 @@ public class View implements Observer{
 	}
 
 	private JMenuBar addUpMenuBarComponents(JMenuBar menuBar){
-		JMenu help = new JMenu("Help");
+		help = setUpHelp();
 		menuBar.add(help);
 
 		return menuBar;
+	}
+
+	private JMenu setUpHelp(){
+		help = new JMenu("Help");
+		
+		help = addHelpComponents(help);
+
+		return help;
+	}
+
+	private JMenu addHelpComponents(JMenu help){
+		instructions = setUpInstructions();
+		moreHelp = setUpMoreHelp();
+
+		help.add(instructions);
+		help.add(moreHelp);
+
+		return help;
+	}
+
+	private JMenuItem setUpInstructions(){
+		instructions = new JMenuItem("How to play");
+		instructions.addActionListener(new InstructionsListener());
+
+		return instructions;	
+	}
+
+	private JMenuItem setUpMoreHelp(){
+		moreHelp = new JMenuItem("More Help");
+		moreHelp.addActionListener(new MoreHelpListener());
+		return moreHelp;
 	}
 
 	private JPanel setUpOverAllPanel(){
@@ -169,8 +225,7 @@ public class View implements Observer{
 		menuLabel = setUpMenuLabel();
 		labelConstraints = setUpLabelConstraints();
 
-		vsCpuButton = new JButton("vs CPU");
-		vsCpuButton.addActionListener(new VsCpuButtonListener());
+		vsCpuButton = setUpVsCpuButton();
 		vsCpuButtonConstraints = setUpVsCpuConstraints();
 
 		exitButton = setUpExitButton();
@@ -202,6 +257,13 @@ public class View implements Observer{
 		labelConstraints.insets = new Insets(0, 0, 100, 0);
 
 		return labelConstraints;
+	}
+
+	private JButton setUpVsCpuButton(){
+		vsCpuButton = new JButton("vs CPU");
+		vsCpuButton.addActionListener(new VsCpuButtonListener());
+
+		return vsCpuButton;
 	}
 
 	private GridBagConstraints setUpVsCpuConstraints(){
@@ -365,9 +427,11 @@ public class View implements Observer{
 
 	private JPanel addInnerButtonPanelComponents(JPanel innerButtonPanel){
 		retryButton = setUpRetryButton();
+		toMenuButton = setUpToMenuButton();
 		exitButton2 = setUpExitButton2();
 
 		innerButtonPanel.add(retryButton);
+		innerButtonPanel.add(toMenuButton);
 		innerButtonPanel.add(exitButton2);
 
 		return innerButtonPanel;
@@ -376,7 +440,15 @@ public class View implements Observer{
 	private JButton setUpRetryButton(){
 		retryButton = new JButton("Retry");
 		retryButton.addActionListener(new RetryButtonListener());
+
 		return retryButton;
+	}
+
+	private JButton setUpToMenuButton(){
+		toMenuButton = new JButton("Menu");
+		toMenuButton.addActionListener(new ToMenuButtonListener());
+
+		return toMenuButton;
 	}
 
 	private JButton setUpExitButton2(){
@@ -425,5 +497,39 @@ public class View implements Observer{
 			CardLayout cl = (CardLayout)(overAllPanel.getLayout());
 			cl.show(overAllPanel, BOARD);
 		}
+	}
+
+	private class ToMenuButtonListener implements ActionListener{
+		public void actionPerformed(ActionEvent e){
+			controller.toMenu();
+		}
+	}
+
+	private class InstructionsListener implements ActionListener{
+		public void actionPerformed(ActionEvent e){
+			String messgae = "It's TicTacToe you should\n"
+					+ "already know how to play!!!";
+			JOptionPane.showMessageDialog(frame, 
+						messgae,
+						"How to play",
+						JOptionPane.INFORMATION_MESSAGE,
+						faceImage);
+		}
+
+	}
+
+	private class MoreHelpListener implements ActionListener{
+		public void actionPerformed(ActionEvent e){
+			String messgae = "For more help please call\n"
+				+ "the National Suicide Prevention Lifeline at:\n"
+				+ "1-800-273-8255\n"
+				+ "available 24 hours in English or Spanish.";
+			JOptionPane.showMessageDialog(frame, 
+						messgae,
+						"More Help",
+						JOptionPane.INFORMATION_MESSAGE,
+						lifeLineImage);
+		}
+
 	}
 }
