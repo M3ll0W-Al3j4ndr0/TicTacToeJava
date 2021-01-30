@@ -22,9 +22,13 @@ public class View implements Observer{
 			toMenuButton;
 	private ButtonListener buttonListener;
 	private JMenuBar menuBar;
-	private JMenu help;
+	private JMenu help,
+			options,
+			language;
 	private JMenuItem instructions,
-			moreHelp;
+			moreHelp,
+			english,
+			spanish;
 	private ImageIcon xImage,
 		oImage,
 		faceImage,
@@ -41,8 +45,11 @@ public class View implements Observer{
 	private Engine model;
 	private final String MENU = "Menu panel",
 				BOARD = "Board panel";
+	private Messages messages;
 
 	public View(){
+		messages = new SpanishMessages(); //EnglishMessages();// <- in development..
+
 		String filePath = "Resources/";
 		xImage = getImage(filePath + "x.png");
 		oImage = getImage(filePath + "o.png");
@@ -88,10 +95,12 @@ public class View implements Observer{
 	}
 
 	public void showEndingMenu(){
-		String message = model.haveAWinner()? 
-					model.xPlayerWon()? "X player wins!"
-							: "O player wins!"
-					: "It's a Tie!!";
+		String message =
+			 model.haveAWinner()? 
+					model.xPlayerWon()? messages.xPlayerWin()
+							: messages.oPlayerWin()
+				: messages.tieGame();
+
 		resultLabel.setText(message);
 		layeredPanel.setLayer(innerMenuPanel, Integer.valueOf(2));	
 
@@ -138,20 +147,59 @@ public class View implements Observer{
 
 	private JMenuBar setUpMenuBar(){
 		menuBar = new JMenuBar();
-		menuBar = addUpMenuBarComponents(menuBar);
+
+		menuBar = addMenuBarComponents(menuBar);
 
 		return menuBar;
 	}
 
-	private JMenuBar addUpMenuBarComponents(JMenuBar menuBar){
+	private JMenuBar addMenuBarComponents(JMenuBar menuBar){
+		options = setUpOptions();
 		help = setUpHelp();
+
+		menuBar.add(options);
 		menuBar.add(help);
 
 		return menuBar;
 	}
 
+	private JMenu setUpOptions(){
+		options = new JMenu(messages.options());
+
+		options = addOptionsComponents(options);
+
+		return options;
+	}
+
+	private JMenu addOptionsComponents(JMenu options){
+		language = setUpLanguage();
+
+		options.add(language);
+
+		return options;
+	}
+
+	private JMenu setUpLanguage(){
+		language = new JMenu(messages.language());
+
+		language = addLanguageComponents(language);
+
+		return language;
+	}
+
+
+	private JMenu addLanguageComponents(JMenu language){
+		english = new JMenuItem("English");
+		spanish = new JMenuItem("Español");
+
+		language.add(english);
+		language.add(spanish);
+
+		return language;
+	}
+
 	private JMenu setUpHelp(){
-		help = new JMenu("Help");
+		help = new JMenu(messages.help());
 		
 		help = addHelpComponents(help);
 
@@ -169,14 +217,14 @@ public class View implements Observer{
 	}
 
 	private JMenuItem setUpInstructions(){
-		instructions = new JMenuItem("How to play");
+		instructions = new JMenuItem(messages.howToPlay());
 		instructions.addActionListener(new InstructionsListener());
 
 		return instructions;	
 	}
 
 	private JMenuItem setUpMoreHelp(){
-		moreHelp = new JMenuItem("More Help");
+		moreHelp = new JMenuItem(messages.moreHelp());
 		moreHelp.addActionListener(new MoreHelpListener());
 		return moreHelp;
 	}
@@ -243,7 +291,7 @@ public class View implements Observer{
 	}
 
 	private JLabel setUpMenuLabel(){
-		menuLabel = new JLabel("Select Mode:");
+		menuLabel = new JLabel(messages.selectMode());
 		menuLabel.setFont(new Font("Calibri", Font.PLAIN, 40));
 
 		return menuLabel;
@@ -260,7 +308,7 @@ public class View implements Observer{
 	}
 
 	private JButton setUpVsCpuButton(){
-		vsCpuButton = new JButton("vs CPU");
+		vsCpuButton = new JButton(messages.vsCPU());
 		vsCpuButton.addActionListener(new VsCpuButtonListener());
 
 		return vsCpuButton;
@@ -275,7 +323,7 @@ public class View implements Observer{
 	}
 
 	private JButton setUpExitButton(){
-		exitButton = new JButton("Exit");
+		exitButton = new JButton(messages.exit());
 		exitButton.addActionListener(new ExitButtonListener());
 
 		return exitButton;
@@ -290,7 +338,7 @@ public class View implements Observer{
 	}
 
 	private JButton setUpTwoPlayerButton(){
-		twoPlayerButton = new JButton("2 Players");
+		twoPlayerButton = new JButton(messages.twoPlayers());
 		twoPlayerButton.addActionListener(new TwoPlayerButtonListener());
 
 		return twoPlayerButton;
@@ -359,7 +407,7 @@ public class View implements Observer{
 	}
 
 	private JButton setUpButton(ButtonListener buttonListener){
-		JButton button = new JButton("Click here!!");
+		JButton button = new JButton(messages.clickHere());
 		button.addActionListener(buttonListener);
 
 		return button;
@@ -438,21 +486,21 @@ public class View implements Observer{
 	}
 
 	private JButton setUpRetryButton(){
-		retryButton = new JButton("Retry");
+		retryButton = new JButton(messages.retry());
 		retryButton.addActionListener(new RetryButtonListener());
 
 		return retryButton;
 	}
 
 	private JButton setUpToMenuButton(){
-		toMenuButton = new JButton("Menu");
+		toMenuButton = new JButton(messages.menu());
 		toMenuButton.addActionListener(new ToMenuButtonListener());
 
 		return toMenuButton;
 	}
 
 	private JButton setUpExitButton2(){
-		exitButton2 = new JButton("Exit");
+		exitButton2 = new JButton(messages.exit());
 		exitButton2.addActionListener(new ExitButtonListener());
 
 		return exitButton2;
@@ -507,11 +555,9 @@ public class View implements Observer{
 
 	private class InstructionsListener implements ActionListener{
 		public void actionPerformed(ActionEvent e){
-			String messgae = "It's TicTacToe you should\n"
-					+ "already know how to play!!!";
 			JOptionPane.showMessageDialog(frame, 
-						messgae,
-						"How to play",
+						messages.instructions(),
+						messages.howToPlay(),
 						JOptionPane.INFORMATION_MESSAGE,
 						faceImage);
 		}
@@ -520,13 +566,9 @@ public class View implements Observer{
 
 	private class MoreHelpListener implements ActionListener{
 		public void actionPerformed(ActionEvent e){
-			String messgae = "For more help please call\n"
-				+ "the National Suicide Prevention Lifeline at:\n"
-				+ "1-800-273-8255\n"
-				+ "available 24 hours in English or Spanish.";
 			JOptionPane.showMessageDialog(frame, 
-						messgae,
-						"More Help",
+						messages.moreHelpMessage(),
+						messages.moreHelp(),
 						JOptionPane.INFORMATION_MESSAGE,
 						lifeLineImage);
 		}
