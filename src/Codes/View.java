@@ -27,8 +27,10 @@ public class View implements Observer{
 			language;
 	private JMenuItem instructions,
 			moreHelp,
-			english,
-			spanish;
+			toMenu;
+	private JRadioButtonMenuItem englishButton,
+			spanishButton;
+	private ButtonGroup languageGroup;
 	private ImageIcon xImage,
 		oImage,
 		faceImage,
@@ -46,9 +48,12 @@ public class View implements Observer{
 	private final String MENU = "Menu panel",
 				BOARD = "Board panel";
 	private Messages messages;
+	private MessagesFactory messagesFactory;
 
-	public View(){
-		messages = new SpanishMessages(); //EnglishMessages();// <- in development..
+	public View(MessagesFactory messagesFactory){
+		this.messagesFactory = messagesFactory;
+		messages = messagesFactory.create(Language.ENGLISH);
+		languageGroup = new ButtonGroup();
 
 		String filePath = "Resources/";
 		xImage = getImage(filePath + "x.png");
@@ -63,7 +68,38 @@ public class View implements Observer{
 		frame.setVisible(true);
 	}
 
+	public void updateLanguage(){
+		menuLabel.setText(messages.selectMode());
+		twoPlayerButton.setText(messages.twoPlayers());
+		vsCpuButton.setText(messages.vsCPU());
+		exitButton.setText(messages.exit());
+
+		options.setText(messages.options());
+		toMenu.setText(messages.menu());
+		language.setText(messages.language());
+		help.setText(messages.help());
+		instructions.setText(messages.howToPlay());
+		moreHelp.setText(messages.moreHelp());
+		retryButton.setText(messages.retry());
+		toMenuButton.setText(messages.menu());
+		exitButton2.setText(messages.exit());
+		
+		for(JButton button: buttons){
+			if(button.getText() != ""){
+				button.setText(messages.clickHere());
+			}
+		}
+	}
+	
+	public void showBoard(){
+		toMenu.setEnabled(true);
+		CardLayout cl = (CardLayout)(overAllPanel.getLayout());
+		cl.show(overAllPanel, BOARD);
+
+	}
+
 	public void showMainMenu(){
+		toMenu.setEnabled(false);
 		CardLayout cli = (CardLayout)overAllPanel.getLayout();
 
 		cli.show(overAllPanel, MENU);
@@ -172,11 +208,21 @@ public class View implements Observer{
 	}
 
 	private JMenu addOptionsComponents(JMenu options){
+		toMenu = setUpToMenu();
 		language = setUpLanguage();
 
+		options.add(toMenu);
 		options.add(language);
 
 		return options;
+	}
+
+	private JMenuItem setUpToMenu(){
+		toMenu = new JMenuItem(messages.menu());
+		toMenu.setEnabled(false);
+		toMenu.addActionListener(new ToMenuButtonListener());
+	
+		return toMenu;
 	}
 
 	private JMenu setUpLanguage(){
@@ -189,11 +235,17 @@ public class View implements Observer{
 
 
 	private JMenu addLanguageComponents(JMenu language){
-		english = new JMenuItem("English");
-		spanish = new JMenuItem("Español");
+		englishButton = new JRadioButtonMenuItem("English", true);
+		spanishButton = new JRadioButtonMenuItem("Español");
 
-		language.add(english);
-		language.add(spanish);
+		englishButton.addActionListener(new EnglishListener());
+		spanishButton.addActionListener(new SpanishListener());
+
+		languageGroup.add(englishButton);
+		languageGroup.add(spanishButton);
+
+		language.add(englishButton);
+		language.add(spanishButton);
 
 		return language;
 	}
@@ -528,8 +580,7 @@ public class View implements Observer{
 	private class TwoPlayerButtonListener implements ActionListener{
 		public void actionPerformed(ActionEvent e){
 			controller.cpuMode(false);	
-			CardLayout cl = (CardLayout)(overAllPanel.getLayout());
-			cl.show(overAllPanel, BOARD);
+			controller.gameStart();
 		}
 	}
 		
@@ -542,8 +593,7 @@ public class View implements Observer{
 	private class VsCpuButtonListener implements ActionListener{
 		public void actionPerformed(ActionEvent e){
 			controller.cpuMode(true);	
-			CardLayout cl = (CardLayout)(overAllPanel.getLayout());
-			cl.show(overAllPanel, BOARD);
+			controller.gameStart();
 		}
 	}
 
@@ -573,5 +623,19 @@ public class View implements Observer{
 						lifeLineImage);
 		}
 
+	}
+
+	private class EnglishListener implements ActionListener{
+		public void actionPerformed(ActionEvent e){
+			messages = messagesFactory.create(Language.ENGLISH);
+			controller.updateLanguage();
+		}
+	}
+
+	private class SpanishListener implements ActionListener{
+		public void actionPerformed(ActionEvent e){
+			messages = messagesFactory.create(Language.SPANISH);
+			controller.updateLanguage();
+		}
 	}
 }

@@ -12,6 +12,10 @@ public class Controller{
 		viewer.setModel(model);
 	}
 
+	public void updateLanguage(){
+		viewer.updateLanguage();	
+	}
+
 	public void reset(){
 		model.reset();
 		viewer.reset();
@@ -23,6 +27,10 @@ public class Controller{
 		if(model.haveAWinner() || model.getNumOfTurns() == 5){
 			viewer.showEndingMenu();
 		}
+	}
+
+	public void gameStart(){
+		viewer.showBoard();
 	}
 
 	public void cpuMode(boolean enable){
