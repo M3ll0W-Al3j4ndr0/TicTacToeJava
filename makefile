@@ -10,11 +10,11 @@ classFiles:= $(patsubst $(javaPath)/%.java, $(classPath)/%.class, $(javaFiles))
 default: $(classFiles)
 	
 $(classFiles): $(classPath)%.class: $(javaPath)%.java
-	javac $< -d $(classPath) -sourcepath $(javaPath)
+	javac $< -d $(classPath) -sourcepath $(javaPath) --release 8
 
 run: default
 	java -cp $(classPath) Driver
 jar: default
-	jar -cvmf manifest.txt Tic.jar -C src/Classes .
+	jar -cvmf manifest.txt TicTacToe4.jar -C src/Classes .
 clean:
 	rm $(classPath)/*.class

@@ -29,7 +29,8 @@ public class View implements Observer{
 			moreHelp,
 			toMenu;
 	private JRadioButtonMenuItem englishButton,
-			spanishButton;
+			spanishButton,
+			vietnameseButton;
 	private ButtonGroup languageGroup;
 	private ImageIcon xImage,
 		oImage,
@@ -49,11 +50,15 @@ public class View implements Observer{
 				BOARD = "Board panel";
 	private Messages messages;
 	private MessagesFactory messagesFactory;
+	private Color mainMenuButtonColor,
+			customBackgroundColor;
 
 	public View(MessagesFactory messagesFactory){
 		this.messagesFactory = messagesFactory;
 		messages = messagesFactory.create(Language.ENGLISH);
 		languageGroup = new ButtonGroup();
+		mainMenuButtonColor = new Color(226, 243, 250);
+		customBackgroundColor = new Color(224, 224, 224);
 
 		String filePath = "Resources/";
 		xImage = getImage(filePath + "x.png");
@@ -83,6 +88,7 @@ public class View implements Observer{
 		retryButton.setText(messages.retry());
 		toMenuButton.setText(messages.menu());
 		exitButton2.setText(messages.exit());
+		setResultMessage();
 		
 		for(JButton button: buttons){
 			if(button.getText() != ""){
@@ -131,6 +137,16 @@ public class View implements Observer{
 	}
 
 	public void showEndingMenu(){
+		setResultMessage();
+		layeredPanel.setLayer(innerMenuPanel, Integer.valueOf(2));	
+
+		for(JButton button: buttons){
+			button.setEnabled(false);
+			button.setBackground(Color.GRAY);
+		}
+	}
+
+	private void setResultMessage(){
 		String message =
 			 model.haveAWinner()? 
 					model.xPlayerWon()? messages.xPlayerWin()
@@ -138,11 +154,7 @@ public class View implements Observer{
 				: messages.tieGame();
 
 		resultLabel.setText(message);
-		layeredPanel.setLayer(innerMenuPanel, Integer.valueOf(2));	
 
-		for(JButton button: buttons){
-			button.setEnabled(false);
-		}
 	}
 
 	private JFrame setUpFrame(){
@@ -183,6 +195,7 @@ public class View implements Observer{
 
 	private JMenuBar setUpMenuBar(){
 		menuBar = new JMenuBar();
+		menuBar.setBackground(Color.WHITE);
 
 		menuBar = addMenuBarComponents(menuBar);
 
@@ -220,6 +233,7 @@ public class View implements Observer{
 	private JMenuItem setUpToMenu(){
 		toMenu = new JMenuItem(messages.menu());
 		toMenu.setEnabled(false);
+		toMenu.setBackground(Color.WHITE);
 		toMenu.addActionListener(new ToMenuButtonListener());
 	
 		return toMenu;
@@ -227,6 +241,8 @@ public class View implements Observer{
 
 	private JMenu setUpLanguage(){
 		language = new JMenu(messages.language());
+		language.setBackground(Color.WHITE); 
+		language.setOpaque(true);
 
 		language = addLanguageComponents(language);
 
@@ -236,16 +252,23 @@ public class View implements Observer{
 
 	private JMenu addLanguageComponents(JMenu language){
 		englishButton = new JRadioButtonMenuItem("English", true);
+		englishButton.setBackground(Color.WHITE);
 		spanishButton = new JRadioButtonMenuItem("Español");
+		spanishButton.setBackground(Color.WHITE);
+		vietnameseButton = new JRadioButtonMenuItem("Tiếng Việt");
+		vietnameseButton.setBackground(Color.WHITE);
 
 		englishButton.addActionListener(new EnglishListener());
 		spanishButton.addActionListener(new SpanishListener());
+		vietnameseButton.addActionListener(new VietnameseListener());
 
 		languageGroup.add(englishButton);
 		languageGroup.add(spanishButton);
+		languageGroup.add(vietnameseButton);
 
 		language.add(englishButton);
 		language.add(spanishButton);
+		language.add(vietnameseButton);
 
 		return language;
 	}
@@ -271,6 +294,7 @@ public class View implements Observer{
 	private JMenuItem setUpInstructions(){
 		instructions = new JMenuItem(messages.howToPlay());
 		instructions.addActionListener(new InstructionsListener());
+		instructions.setBackground(Color.WHITE);
 
 		return instructions;	
 	}
@@ -278,6 +302,7 @@ public class View implements Observer{
 	private JMenuItem setUpMoreHelp(){
 		moreHelp = new JMenuItem(messages.moreHelp());
 		moreHelp.addActionListener(new MoreHelpListener());
+		moreHelp.setBackground(Color.WHITE);
 		return moreHelp;
 	}
 
@@ -317,6 +342,7 @@ public class View implements Observer{
 	private JPanel setUpMenuPanelDetails(){
 		menuPanel = new JPanel();
 		menuPanel.setLayout(new GridBagLayout());
+		menuPanel.setBackground(customBackgroundColor); /// <- Testing
 
 		return menuPanel;
 	}
@@ -361,7 +387,9 @@ public class View implements Observer{
 
 	private JButton setUpVsCpuButton(){
 		vsCpuButton = new JButton(messages.vsCPU());
+		vsCpuButton.setBackground(mainMenuButtonColor);
 		vsCpuButton.addActionListener(new VsCpuButtonListener());
+		vsCpuButton.addMouseListener(new VsCpuButtonMouseListener());
 
 		return vsCpuButton;
 	}
@@ -376,7 +404,9 @@ public class View implements Observer{
 
 	private JButton setUpExitButton(){
 		exitButton = new JButton(messages.exit());
+		exitButton.setBackground(mainMenuButtonColor);
 		exitButton.addActionListener(new ExitButtonListener());
+		exitButton.addMouseListener(new ExitButtonMouseListener());
 
 		return exitButton;
 	}
@@ -391,7 +421,9 @@ public class View implements Observer{
 
 	private JButton setUpTwoPlayerButton(){
 		twoPlayerButton = new JButton(messages.twoPlayers());
+		twoPlayerButton.setBackground(mainMenuButtonColor);
 		twoPlayerButton.addActionListener(new TwoPlayerButtonListener());
+		twoPlayerButton.addMouseListener(new TwoPlayerButtonMouseListener());
 
 		return twoPlayerButton;
 	}
@@ -432,8 +464,9 @@ public class View implements Observer{
 
 	private JPanel setUpBoardPanelDetails(){
 		boardPanel = new JPanel();
-		boardPanel.setLayout(new GridLayout(3, 3));
+		boardPanel.setLayout(new GridLayout(3, 3, 5, 5));
 		boardPanel.setBackground(Color.BLACK);
+		boardPanel.setBorder(BorderFactory.createLineBorder(Color.black, 5));
 		boardPanel.setBounds(0, 0, 500, 500);
 
 		return boardPanel;
@@ -460,6 +493,8 @@ public class View implements Observer{
 
 	private JButton setUpButton(ButtonListener buttonListener){
 		JButton button = new JButton(messages.clickHere());
+		button.setBackground(Color.WHITE);
+		button.setFocusable(false);
 		button.addActionListener(buttonListener);
 
 		return button;
@@ -482,8 +517,9 @@ public class View implements Observer{
 
 	private JPanel setUpInnerMenuPanelDetails(){
 		innerMenuPanel = new JPanel();
-		innerMenuPanel.setOpaque(true);
+		innerMenuPanel.setBackground(customBackgroundColor);
 		innerMenuPanel.setBounds(100, 200, 300, 100);
+		innerMenuPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 		innerMenuPanel.setLayout(new BorderLayout());
 
 		return innerMenuPanel;
@@ -501,6 +537,7 @@ public class View implements Observer{
 
 	private JPanel setUpInnerLabelPanel(){
 		innerLabelPanel = new JPanel();
+		innerLabelPanel.setOpaque(false);
 
 		resultLabel = setUpResultLabel();
 
@@ -511,7 +548,6 @@ public class View implements Observer{
 	
 	private JLabel setUpResultLabel(){
 		resultLabel = new JLabel("Congratulations!!");
-		resultLabel.setOpaque(true);
 		resultLabel.setFont(new Font("Calibri", Font.PLAIN, 20));
 
 		return resultLabel;
@@ -519,6 +555,7 @@ public class View implements Observer{
 
 	private JPanel setUpInnerButtonPanel(){
 		innerButtonPanel = new JPanel();
+		innerButtonPanel.setOpaque(false);
 
 		innerButtonPanel = addInnerButtonPanelComponents(innerButtonPanel);
 
@@ -539,21 +576,27 @@ public class View implements Observer{
 
 	private JButton setUpRetryButton(){
 		retryButton = new JButton(messages.retry());
+		retryButton.setBackground(mainMenuButtonColor);
 		retryButton.addActionListener(new RetryButtonListener());
+		retryButton.addMouseListener(new RetryButtonMouseListener());
 
 		return retryButton;
 	}
 
 	private JButton setUpToMenuButton(){
 		toMenuButton = new JButton(messages.menu());
+		toMenuButton.setBackground(mainMenuButtonColor);
 		toMenuButton.addActionListener(new ToMenuButtonListener());
+		toMenuButton.addMouseListener(new ToMenuButtonMouseListener());
 
 		return toMenuButton;
 	}
 
 	private JButton setUpExitButton2(){
 		exitButton2 = new JButton(messages.exit());
+		exitButton2.setBackground(mainMenuButtonColor);
 		exitButton2.addActionListener(new ExitButtonListener());
+		exitButton2.addMouseListener(new ExitButtonMouseListener());
 
 		return exitButton2;
 	}
@@ -636,6 +679,83 @@ public class View implements Observer{
 		public void actionPerformed(ActionEvent e){
 			messages = messagesFactory.create(Language.SPANISH);
 			controller.updateLanguage();
+		}
+	}
+
+	private class VietnameseListener implements ActionListener{
+		public void actionPerformed(ActionEvent e){
+			messages = messagesFactory.create(Language.VIETNAMESE);
+			controller.updateLanguage();
+		}
+	}
+	
+	private class VsCpuButtonMouseListener extends MouseAdapter{
+		public void mouseEntered(MouseEvent e){
+			JButton button = (JButton)e.getSource();
+
+			button.setBackground(Color.GREEN);
+		}
+
+		public void mouseExited(MouseEvent e){
+			JButton button = (JButton)e.getSource();
+
+			button.setBackground(mainMenuButtonColor);
+		}
+	}
+
+	private class TwoPlayerButtonMouseListener extends MouseAdapter{
+		public void mouseEntered(MouseEvent e){
+			JButton button = (JButton)e.getSource();
+
+			button.setBackground(new Color(69, 140, 204));
+		}
+
+		public void mouseExited(MouseEvent e){
+			JButton button = (JButton)e.getSource();
+
+			button.setBackground(mainMenuButtonColor);
+		}
+	}
+	
+	private class ExitButtonMouseListener extends MouseAdapter{
+		public void mouseEntered(MouseEvent e){
+			JButton button = (JButton)e.getSource();
+
+			button.setBackground(new Color(240, 86, 88));
+		}
+
+		public void mouseExited(MouseEvent e){
+			JButton button = (JButton)e.getSource();
+
+			button.setBackground(mainMenuButtonColor);
+		}
+	}
+
+	private class RetryButtonMouseListener extends MouseAdapter{
+		public void mouseEntered(MouseEvent e){
+			JButton button = (JButton)e.getSource();
+
+			button.setBackground(new Color(248, 242, 132));
+		}
+
+		public void mouseExited(MouseEvent e){
+			JButton button = (JButton)e.getSource();
+
+			button.setBackground(mainMenuButtonColor);
+		}
+	}
+
+	private class ToMenuButtonMouseListener extends MouseAdapter{
+		public void mouseEntered(MouseEvent e){
+			JButton button = (JButton)e.getSource();
+
+			button.setBackground(new Color(249, 176, 126));
+		}
+
+		public void mouseExited(MouseEvent e){
+			JButton button = (JButton)e.getSource();
+
+			button.setBackground(mainMenuButtonColor);
 		}
 	}
 }
