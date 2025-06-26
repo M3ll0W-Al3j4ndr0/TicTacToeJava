@@ -1,4 +1,4 @@
-public class VietnameseMessages implements Messages{
+public class VietnameseLanguageState implements LanguageState{
 	public String xPlayerWin(){
 		return "Người chơi X Thắng!";
 	}
@@ -32,7 +32,7 @@ public class VietnameseMessages implements Messages{
 	}
 
 	public String selectMode(){
-		return "Chọn chế độ";
+		return "Chọn chế độ:";
 	}
 
 	public String vsCPU(){

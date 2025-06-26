@@ -13,7 +13,7 @@ public class Driver{
 		}
 
 		Engine ticTacToe = new Engine();
-		View viewer = new View(new MessagesFactory());
+		View viewer = new View(new Messages());
 		Controller controller = new Controller(viewer, ticTacToe);
 	}
 }

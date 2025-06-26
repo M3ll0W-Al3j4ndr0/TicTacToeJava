@@ -49,13 +49,11 @@ public class View implements Observer{
 	private final String MENU = "Menu panel",
 				BOARD = "Board panel";
 	private Messages messages;
-	private MessagesFactory messagesFactory;
 	private Color mainMenuButtonColor,
 			customBackgroundColor;
 
-	public View(MessagesFactory messagesFactory){
-		this.messagesFactory = messagesFactory;
-		messages = messagesFactory.create(Language.ENGLISH);
+	public View(Messages messages){
+		this.messages = messages;
 		languageGroup = new ButtonGroup();
 		mainMenuButtonColor = new Color(226, 243, 250);
 		customBackgroundColor = new Color(224, 224, 224);
@@ -670,21 +668,21 @@ public class View implements Observer{
 
 	private class EnglishListener implements ActionListener{
 		public void actionPerformed(ActionEvent e){
-			messages = messagesFactory.create(Language.ENGLISH);
+			messages.setLanguage(messages.getEnglishLanguage());
 			controller.updateLanguage();
 		}
 	}
 
 	private class SpanishListener implements ActionListener{
 		public void actionPerformed(ActionEvent e){
-			messages = messagesFactory.create(Language.SPANISH);
+			messages.setLanguage(messages.getSpanishLanguage());
 			controller.updateLanguage();
 		}
 	}
 
 	private class VietnameseListener implements ActionListener{
 		public void actionPerformed(ActionEvent e){
-			messages = messagesFactory.create(Language.VIETNAMESE);
+			messages.setLanguage(messages.getVietnameseLanguage());
 			controller.updateLanguage();
 		}
 	}

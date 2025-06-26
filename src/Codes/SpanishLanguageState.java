@@ -1,4 +1,4 @@
-public class SpanishMessages implements Messages{
+public class SpanishLanguageState implements LanguageState{
 	public String xPlayerWin(){
 		return "¡X jugador gano!";
 	}

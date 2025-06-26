@@ -1,36 +1,98 @@
-public interface Messages{
+public class Messages{
+	private LanguageState current,	
+			english,
+			spanish,
+			vietnamese;
+
+	public Messages(){
+		english = new EnglishLanguageState();
+		spanish = new SpanishLanguageState();
+		vietnamese = new VietnameseLanguageState();
+
+		current = english;	
+	}
+
+	public void setLanguage(LanguageState language){
+		this.current = language;
+	}
 	
-	public String xPlayerWin();
+	public LanguageState getEnglishLanguage(){
+		return english;
+	}
 
-	public String oPlayerWin();
+	public LanguageState getSpanishLanguage(){
+		return spanish;
+	}
 
-	public String tieGame();
+	public LanguageState getVietnameseLanguage(){
+		return vietnamese;
+	}
 
-	public String options();
+	public String xPlayerWin(){
+		return current.xPlayerWin();
+	}
 
-	public String language();
+	public String oPlayerWin(){
+		return current.oPlayerWin();
+	}
 
-	public String help();
+	public String tieGame(){
+		return current.tieGame();
+	}
 
-	public String howToPlay();
+	public String options(){
+		return current.options();
+	}
 
-	public String moreHelp();
+	public String language(){
+		return current.language();
+	}
 
-	public String selectMode();
+	public String help(){
+		return current.help();
+	}
 
-	public String vsCPU();
+	public String howToPlay(){
+		return current.howToPlay();
+	}
 
-	public String exit();
+	public String moreHelp(){
+		return current.moreHelp();
+	}
 
-	public String twoPlayers();
+	public String selectMode(){
+		return current.selectMode();
+	}
 
-	public String clickHere();
+	public String vsCPU(){
+		return current.vsCPU();
+	}
 
-	public String retry();
+	public String exit(){
+		return current.exit();
+	}
 
-	public String menu();
+	public String twoPlayers(){
+		return current.twoPlayers();
+	}
 
-	public String instructions();
+	public String clickHere(){
+		return current.clickHere();
+	}
 
-	public String moreHelpMessage();
+	public String retry(){
+		return current.retry();
+	}
+
+	public String menu(){
+		return current.menu();
+	}
+
+	public String instructions(){
+		return current.instructions();
+	}
+
+	public String moreHelpMessage(){
+		return current.moreHelpMessage();
+	}
 }
